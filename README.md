@@ -96,8 +96,8 @@ tools/companies.py         Company search with Apify (Google Maps)
 tools/webpage.py           Website reading with ScrapingBee (text, published emails, social links)
 tools/env.py               Stores and reads each user's API keys (never in the code)
 ui/server.py               Server: runs the agents, live events, CRM API, follow-up watcher
-ui/crm.html                CRM (contacts, pipeline, prospect record, settings)
-ui/campus.html             3D campus (Three.js) with the Manager chat and live activity
+ui/crm.html, crm.js, crm.css         CRM (contacts, pipeline, prospect record, settings)
+ui/campus.html, campus.js, campus.css  3D campus (Three.js) with the Manager chat and live activity
 ```
 
 ## Tech

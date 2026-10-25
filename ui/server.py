@@ -395,11 +395,13 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(crm_contact(int(parse_qs(u.query).get("id", ["0"])[0] or 0)))
         if u.path in routes:
             return self.send_json(routes[u.path]())
-        pages = {"/": "crm.html", "/crm": "crm.html", "/campus": "campus.html"}
+        pages = {"/": "crm.html", "/crm": "crm.html", "/campus": "campus.html",
+                 **{f"/static/{f}": f for f in ("crm.js", "crm.css", "campus.js", "campus.css")}}   # closed list: nothing else is served
         if u.path in pages:
             body = (UI / pages[u.path]).read_bytes()
+            kind = {"html": "text/html", "js": "text/javascript", "css": "text/css"}[pages[u.path].rsplit(".", 1)[1]]
             self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Type", f"{kind}; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             return self.wfile.write(body)
