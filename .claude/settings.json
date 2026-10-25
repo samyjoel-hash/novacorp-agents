@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 tools/db.py:*)",
+      "Bash(python3 tools/companies.py:*)",
+      "Bash(python3 tools/webpage.py:*)",
+      "Bash(rm emails/drafts/:*)",
+      "WebSearch",
+      "WebFetch",
+      "Read",
+      "Edit(emails/drafts/**)",
+      "Edit(data/strategy.md)"
+    ],
+    "deny": [
+      "Edit(tools/**)",
+      "Edit(.claude/**)",
+      "Edit(data/novacorp.db)"
+    ]
+  }
+}

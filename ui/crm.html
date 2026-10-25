@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NovaCorp CRM</title>
+<style>
+  :root{--ivory:#FAF9F5;--paper:#F0EEE6;--line:#E3DFD3;--ink:#141413;--muted:#6B6A63;--clay:#D97757;--clayd:#BD5D3A;
+        --side:#1F1E1C;--side2:#2B2A27;--sidetx:#B9B6AC;
+        --green:#3f7a3d;--blue:#3d6a99;--gold:#9a7425;--shadow:0 10px 34px rgba(20,20,19,.14)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#F3F1EA;color:var(--ink);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+  body{display:flex}
+  .serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+  a{color:var(--clayd)}
+  button{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:var(--ivory);border:1px solid var(--line);border-radius:10px;padding:6px 11px;cursor:pointer}
+  button:hover{background:var(--paper)}
+
+  /* sidebar */
+  #side{width:232px;flex:none;background:var(--side);color:var(--sidetx);display:flex;flex-direction:column;padding:16px 12px;height:100vh;position:sticky;top:0}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;color:#fff}
+  .brand i{width:32px;height:32px;border-radius:10px;background:var(--clay);display:grid;place-items:center;font-style:normal;font-weight:700}
+  .brand b{font-size:17px;font-weight:500}
+  .brand small{display:block;font-size:11px;color:var(--sidetx);font-weight:400}
+  .navlbl{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:14px 10px 6px;color:#85827a}
+  .nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;color:var(--sidetx);text-decoration:none;font-weight:600;font-size:13.5px;cursor:pointer}
+  .nav:hover{background:var(--side2);color:#fff}
+  .nav.on{background:var(--clay);color:#fff}
+  .nav .ic{width:18px;text-align:center}
+  .nav .cnt{margin-left:auto;font-size:11px;background:#ffffff1a;border-radius:999px;padding:0 7px}
+  .agents{margin-top:auto;padding:10px;border-radius:12px;background:var(--side2);font-size:12px}
+  .agents .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#85827a;margin-right:6px}
+  .agents .dot.on{background:#6fbf6a;box-shadow:0 0 0 3px #6fbf6a33}
+
+  /* content */
+  #app{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:auto}
+  .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 24px 6px}
+  .top h1{margin:0;font-size:24px;font-weight:500}
+  .top .sub{color:var(--muted);font-size:13px}
+  .kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:12px 24px}
+  .kpi{background:var(--ivory);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .kpi span{font-size:12px;color:var(--muted)}
+  .kpi b{display:block;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+  .card{background:var(--ivory);border:1px solid var(--line);border-radius:16px;margin:6px 24px 24px;overflow:hidden}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .tools input{flex:1;min-width:200px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;outline:none}
+  .tools input:focus{border-color:var(--clay)}
+  .chip{border-radius:999px;padding:5px 11px;font-size:12px}
+  .chip.on{background:var(--ink);color:var(--ivory);border-color:var(--ink)}
+  .wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--paper)}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--paper)}
+  tbody tr.sel{background:#d977571a}
+  .who{display:flex;align-items:center;gap:10px}
+  .av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;flex:none}
+  .name{font-weight:600;color:var(--ink)}
+  td small,.sub{color:var(--muted);font-size:12px}
+  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .st{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:700;background:var(--paper);color:var(--muted);white-space:nowrap}
+  .st.enriched{color:var(--blue);background:#3d6a9914}.st.draft,.st.pending{color:var(--clayd);background:#d9775718}
+  .st.sent{color:var(--gold);background:#9a742518}.st.replied{color:var(--green);background:#3f7a3d18}.st.rejected{opacity:.7}
+  .empty{color:var(--muted);text-align:center;padding:56px 16px}
+
+  /* pipeline */
+  .board{display:grid;grid-template-columns:repeat(6,minmax(220px,1fr));gap:12px;padding:6px 24px 24px;overflow-x:auto;align-items:start}
+  .col{background:var(--paper);border-radius:14px;padding:10px;min-height:120px}
+  .col h4{margin:0 0 8px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center}
+  .col h4 i{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:8px;cursor:pointer;font-size:12.5px}
+  .tile:hover{border-color:var(--clay)}
+  .tile b{display:block;font-size:13px}
+
+  /* detail drawer */
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:580px;max-width:100vw;background:var(--ivory);border-left:1px solid var(--line);box-shadow:var(--shadow);
+          transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:5;display:flex;flex-direction:column}
+  #drawer.open{transform:none}
+  #drawer .dh{display:flex;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+  #drawer .dh .av{width:46px;height:46px;font-size:16px}
+  #drawer h2{margin:0;font-size:22px;font-weight:500}
+  #dBody{flex:1;overflow-y:auto;padding:4px 20px 30px}
+  section{padding:14px 0;border-bottom:1px solid var(--line)}
+  section:last-child{border-bottom:0}
+  h3{margin:0 0 8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  dl{display:grid;grid-template-columns:130px 1fr;gap:5px 12px;margin:0;font-size:13px}
+  dt{color:var(--muted)}
+  dd{margin:0;word-break:break-word}
+  .links{display:flex;flex-wrap:wrap;gap:6px}
+  .links a{background:var(--paper);border-radius:999px;padding:3px 10px;font-size:12px;text-decoration:none;font-weight:600}
+  .brief{background:var(--paper);border-radius:12px;padding:10px 12px;white-space:pre-wrap;font-size:13px}
+  .mail{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;margin-bottom:10px}
+  .mail pre{white-space:pre-wrap;font:inherit;font-size:12.5px;margin:8px 0 0;color:#333}
+  .mail .acts{display:flex;gap:6px;margin-top:8px}
+  .timeline{list-style:none;margin:0;padding:0;font-size:12.5px}
+  .timeline li{padding:5px 0 5px 14px;border-left:2px solid var(--line);position:relative}
+  .timeline li::before{content:"";position:absolute;left:-5px;top:11px;width:8px;height:8px;border-radius:50%;background:var(--clay)}
+  .person{display:block;cursor:pointer;color:var(--clayd);font-weight:600}
+
+  /* settings */
+  .settings{padding:6px 24px 24px;display:grid;gap:12px;max-width:860px}
+  .intro{background:var(--ivory);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13px}
+  .key{background:var(--ivory);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+  .key .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .key .head b{font-size:15px}
+  .key .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .key input{flex:1;min-width:220px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;outline:none}
+  .key input:focus{border-color:var(--clay)}
+  .key .msg{font-size:12.5px;margin-top:8px}
+  .key .msg.ok{color:var(--green)}.key .msg.bad{color:var(--clayd)}
+  button.primary{background:var(--clay);border-color:var(--clay);color:#fff}
+
+  @media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:760px){
+    body{flex-direction:column}
+    #side{width:auto;height:auto;position:static;flex-direction:row;align-items:center;gap:4px;padding:8px 12px;overflow-x:auto}
+    .brand{padding:0 8px 0 0}.brand small,.navlbl,.agents,.nav .cnt{display:none}
+    #app{height:auto}
+    .top,.kpis{padding-left:16px;padding-right:16px}.card{margin:6px 16px 16px}.board{padding:6px 16px 16px}
+    dl{grid-template-columns:1fr}dt{margin-top:6px}
+  }
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="brand"><i>N</i><div><b class="serif">NovaCorp</b><small>Prospecting CRM</small></div></div>
+  <div class="navlbl">CRM</div>
+  <a class="nav on" data-v="contacts"><span class="ic">👤</span>Contacts<span class="cnt" id="nContacts">0</span></a>
+  <a class="nav" data-v="pipeline"><span class="ic">▤</span>Pipeline</a>
+  <div class="navlbl">Agents</div>
+  <a class="nav" href="/campus"><span class="ic">◎</span>Agents campus</a>
+  <div class="navlbl">Account</div>
+  <a class="nav" data-v="settings"><span class="ic">⚙</span>Settings</a>
+  <div class="agents" id="agents"><span class="dot"></span>Connecting…</div>
+</aside>
+
+<div id="app">
+  <div class="top"><div><h1 class="serif" id="title">Contacts</h1><div class="sub" id="subtitle">Every prospect found by the agents</div></div></div>
+  <div class="kpis" id="kpis"></div>
+
+  <div id="vContacts" class="card">
+    <div class="tools">
+      <input id="search" type="search" placeholder="Search a person, a company, a city, an email…">
+      <span id="chips"></span>
+    </div>
+    <div class="wrap"><table>
+      <thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Scraped on</th><th>Stage</th><th>Email sent on</th><th>Follow-ups</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <div class="empty" id="empty" hidden>No prospects yet.<br>Define the target with <b>/target</b>, then run a cycle from the <a href="/campus">agents campus</a>: everything the agents find shows up here.</div>
+  </div>
+
+  <div id="vPipeline" class="board" hidden></div>
+
+  <div id="vSettings" class="settings" hidden>
+    <div class="intro">Connect your own accounts. Keys are stored <b>only on this server</b>, never in the code, and are never shown again in full.
+      <span id="claudeMode"></span></div>
+    <div id="keys"></div>
+  </div>
+</div>
+
+<aside id="drawer" aria-hidden="true">
+  <div class="dh"><div class="av" id="dAv"></div><div style="flex:1;min-width:0"><h2 class="serif" id="dName"></h2><div class="sub" id="dRole"></div></div><button id="dClose" title="Close">✕</button></div>
+  <div id="dBody"></div>
+</aside>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const url = u => /^https?:\/\//i.test(u || '') ? u : (u ? 'https://' + u : '');
+const day = d => d ? esc(String(d).slice(0, 10)) : '—';
+const STAGES = [['new', 'New', '#85827a'], ['enriched', 'Enriched', '#3d6a99'], ['draft', 'Email ready', '#D97757'], ['sent', 'Sent', '#9a7425'], ['replied', 'Replied', '#3f7a3d'], ['rejected', 'Rejected', '#b9b6ac']];
+const LABEL = Object.fromEntries(STAGES.map(([k, l]) => [k, l]));
+const AV = ['#D97757', '#6A9BCC', '#788C5D', '#8A7FB3', '#C9A063', '#BD5D3A'];
+const initials = n => (n || '?').split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+const avColor = n => AV[[...(n || '')].reduce((a, c) => a + c.charCodeAt(0), 0) % AV.length];
+let rows = [], stage = 'all', view = 'contacts', current = null;
+
+// the stage of a prospect: where the outreach stands, else where the enrichment stands
+const stageOf = r => r.email_status === 'replied' || r.replied_at ? 'replied' : r.email_status === 'sent' ? 'sent'
+  : r.email_status === 'pending' ? 'draft' : r.status === 'rejected' || r.company_status === 'rejected' ? 'rejected'
+  : r.company_status === 'enriched' ? 'enriched' : 'new';
+
+$('#chips').innerHTML = [['all', 'All'], ...STAGES].map(([k, l]) => `<button class="chip${k === stage ? ' on' : ''}" data-k="${k}">${l}</button>`).join(' ');
+$('#chips').onclick = e => { const b = e.target.closest('button'); if (!b) return; stage = b.dataset.k;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); draw(); };
+$('#search').oninput = draw;
+
+document.querySelectorAll('.nav[data-v]').forEach(a => a.onclick = () => {
+  view = a.dataset.v;
+  document.querySelectorAll('.nav[data-v]').forEach(x => x.classList.toggle('on', x === a));
+  $('#vContacts').hidden = view !== 'contacts'; $('#vPipeline').hidden = view !== 'pipeline'; $('#vSettings').hidden = view !== 'settings';
+  $('#kpis').hidden = view === 'settings';
+  $('#title').textContent = { contacts: 'Contacts', pipeline: 'Pipeline', settings: 'Settings' }[view];
+  $('#subtitle').textContent = { contacts: 'Every prospect found by the agents', pipeline: 'Where each prospect stands, from scraped to replied',
+    settings: 'Integrations: the accounts the agents work with' }[view];
+  if (view === 'settings') loadSettings(); else draw();
+});
+
+function draw() {
+  const n = s => rows.filter(r => stageOf(r) === s).length;
+  $('#nContacts').textContent = rows.length;
+  $('#kpis').innerHTML = [['Prospects', rows.length], ['Companies', new Set(rows.map(r => r.company_id)).size], ['Emails ready', n('draft')], ['Emails sent', n('sent') + n('replied')], ['Replied', n('replied')]]
+    .map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join('');
+  if (view === 'pipeline') {
+    $('#vPipeline').innerHTML = STAGES.map(([k, l, c]) => { const list = rows.filter(r => stageOf(r) === k);
+      return `<div class="col"><h4><span><i style="background:${c}"></i>${l}</span><span class="sub">${list.length}</span></h4>${list.map(r =>
+        `<div class="tile" data-id="${r.id}"><b>${esc(r.name)}</b>${esc(r.company)}<br><small class="sub">${esc(r.role || '')}${r.sent_at ? ' · sent ' + day(r.sent_at) : ' · scraped ' + day(r.scraped_at)}</small></div>`).join('')}</div>`; }).join('');
+    return;
+  }
+  const q = $('#search').value.trim().toLowerCase();
+  const list = rows.filter(r => (stage === 'all' || stageOf(r) === stage) &&
+    (!q || [r.name, r.role, r.company, r.city, r.email].some(v => (v || '').toLowerCase().includes(q))));
+  $('#rows').innerHTML = list.map(r => `<tr data-id="${r.id}" class="${current === r.id ? 'sel' : ''}">
+    <td><div class="who"><span class="av" style="background:${avColor(r.name)}">${esc(initials(r.name))}</span><div><span class="name">${esc(r.name)}</span><br><small>${esc(r.role || '—')}</small></div></div></td>
+    <td>${esc(r.company)}<br><small>${esc(r.city || '')}</small></td>
+    <td>${r.email ? esc(r.email) : '<small>—</small>'}</td>
+    <td class="num">${day(r.scraped_at)}</td>
+    <td><span class="st ${stageOf(r)}">${LABEL[stageOf(r)]}</span></td>
+    <td class="num">${day(r.sent_at)}</td>
+    <td class="num">${r.followups || 0}</td></tr>`).join('');
+  $('#empty').hidden = rows.length > 0;
+}
+$('#rows').onclick = e => { const tr = e.target.closest('tr'); if (tr) open(+tr.dataset.id); };
+$('#vPipeline').onclick = e => { const t = e.target.closest('.tile'); if (t) open(+t.dataset.id); };
+
+async function load() {
+  try { rows = await (await fetch('/api/crm', { cache: 'no-store' })).json(); draw(); } catch {}
+  try {
+    const s = await (await fetch('/api/stats', { cache: 'no-store' })).json();
+    $('#agents').innerHTML = `<span class="dot${s.busy ? ' on' : ''}"></span>${s.busy ? 'The agents are working' : 'Agents idle'}`;
+  } catch { $('#agents').innerHTML = '<span class="dot"></span>Server unreachable'; }
+}
+load(); setInterval(load, 5000);
+
+const links = o => { const e = Object.entries(o || {}); return e.length ? `<div class="links">${e.map(([k, v]) => `<a href="${esc(url(v))}" target="_blank" rel="noopener">${esc(k)}</a>`).join('')}</div>` : '—'; };
+const addDays = (d, n) => { const t = new Date(String(d).replace(' ', 'T')); t.setDate(t.getDate() + n); return t.toISOString().slice(0, 10); };
+
+async function open(id) {
+  current = id; draw();
+  const d = await (await fetch('/api/crm/contact?id=' + id, { cache: 'no-store' })).json();
+  if (d.error) return;
+  const c = d.contact, co = d.company;
+  $('#dAv').textContent = initials(c.name); $('#dAv').style.background = avColor(c.name);
+  $('#dName').textContent = c.name;
+  $('#dRole').innerHTML = `${esc(c.role || 'Role unknown')} · <b>${esc(co.name)}</b>${co.city ? ' · ' + esc(co.city) : ''}`;
+  const pLinks = { ...(c.linkedin ? { linkedin: c.linkedin } : {}), ...c.links };
+  const coLinks = { ...(co.domain ? { website: co.domain } : {}), ...co.links };
+  const mails = d.drafts.map(m => {
+    const lastTouch = [m.sent_at, ...m.followups.map(f => f.sent_at)].filter(Boolean).sort().pop();
+    const next = m.status === 'sent' && lastTouch && m.followups.length < d.followup_max && !m.followups.some(f => f.status === 'pending')
+      ? `<div class="sub">Next follow-up prepared automatically on <b>${addDays(lastTouch, d.followup_days)}</b> if there is no reply.</div>` : '';
+    return `<div class="mail"><b>${esc(m.subject || '(no subject)')}</b> <span class="st ${esc(m.status)}">${esc(m.status)}</span>
+      <div class="sub">Written ${day(m.created_at)} · Sent ${day(m.sent_at)} · Replied ${day(m.replied_at)}</div>${next}
+      <details><summary class="sub">Read the email</summary><pre>${esc(m.content)}</pre></details>
+      <div class="acts">${m.status === 'pending' ? `<button data-d="${m.id}" data-s="sent">✓ I sent it</button>` : ''}${m.status === 'sent' ? `<button data-d="${m.id}" data-s="replied">↩ They replied</button>` : ''}</div>
+      ${m.followups.map(f => `<div class="mail" style="margin:10px 0 0;background:var(--ivory)"><b>Follow-up ${f.number}</b> <span class="st ${esc(f.status)}">${esc(f.status)}</span>
+        <div class="sub">Prepared ${day(f.created_at)} · Sent ${day(f.sent_at)}</div>
+        <details><summary class="sub">Read the follow-up</summary><pre>${esc(f.content)}</pre></details>
+        ${f.status === 'pending' ? `<div class="acts"><button data-f="${f.id}">✓ I sent it</button></div>` : ''}</div>`).join('')}</div>`;
+  }).join('') || '<div class="sub">No email written yet.</div>';
+  $('#dBody').innerHTML = `
+    <section><h3>Contact</h3><dl>
+      <dt>Email</dt><dd>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : '—'}${c.email_source ? `<br><small class="sub">source: ${esc(c.email_source)}</small>` : ''}</dd>
+      <dt>Phone</dt><dd>${esc(c.phone || co.phone || '—')}</dd>
+      <dt>Networks</dt><dd>${links(pLinks)}</dd>
+      <dt>Scraped on</dt><dd>${day(c.added_at)} <small class="sub">· source: ${esc(c.source || '—')}</small></dd>
+    </dl></section>
+    <section><h3>Company</h3><dl>
+      <dt>Name</dt><dd><b>${esc(co.name)}</b></dd>
+      <dt>Links</dt><dd>${links(coLinks)}</dd>
+      <dt>Category</dt><dd>${esc(co.category || '—')}</dd>
+      <dt>Google rating</dt><dd>${co.rating ? `${esc(co.rating)} ★ (${esc(co.reviews || 0)} reviews)` : '—'}</dd>
+      <dt>Registration no.</dt><dd>${esc(co.registry_id || '—')}</dd>
+      <dt>Employees</dt><dd>${esc(co.headcount || '—')}</dd>
+      <dt>Address</dt><dd>${esc(co.address || co.city || '—')}${co.country ? ' · ' + esc(co.country) : ''}</dd>
+      <dt>Founded</dt><dd>${day(co.created_on)}</dd>
+    </dl></section>
+    <section><h3>Company debrief</h3><div class="brief">${esc(co.debrief || 'Not written yet: the Data Enrichment agent adds it.')}</div></section>
+    <section><h3>Data enrichment</h3><dl>
+      <dt>Status</dt><dd><span class="st ${esc(co.status)}">${esc(co.status)}</span></dd>
+      <dt>Scraped on</dt><dd>${day(co.added_at)}</dd>
+      <dt>Enriched on</dt><dd>${day(co.enriched_at)}</dd>
+      <dt>Hook</dt><dd>${esc(co.hook || '—')}</dd>
+      <dt>Notes</dt><dd>${esc(co.notes || '—')}</dd>
+    </dl></section>
+    <section><h3>Emails &amp; follow-ups</h3>${mails}</section>
+    ${d.colleagues.length ? `<section><h3>Other people at ${esc(co.name)}</h3>${d.colleagues.map(p => `<span class="person" data-c="${p.id}">${esc(p.name)} <small class="sub">${esc(p.role || '')}${p.email ? ' · ' + esc(p.email) : ''}</small></span>`).join('')}</section>` : ''}
+    <section><h3>Agent activity on this company</h3>${d.history.length ? `<ul class="timeline">${d.history.reverse().map(l => `<li>${esc(l).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</li>`).join('')}</ul>` : '<div class="sub">Nothing logged yet.</div>'}</section>`;
+  $('#drawer').classList.add('open'); $('#drawer').setAttribute('aria-hidden', 'false');
+}
+async function mark(body) { await fetch('/api/mark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); await load(); open(current); }
+$('#dBody').onclick = e => {
+  const t = e.target.closest('button,[data-c]'); if (!t) return;
+  if (t.dataset.c) open(+t.dataset.c);
+  else if (t.dataset.d) mark({ draft_id: +t.dataset.d, state: t.dataset.s });
+  else if (t.dataset.f) mark({ followup_id: +t.dataset.f });
+};
+// ---- settings: each user connects their own Anthropic, Apify and ScrapingBee accounts
+const post = (u, body) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+function drawSettings(st) {
+  $('#claudeMode').innerHTML = st.claude_mode === 'api_key'
+    ? '<br>The agents run on <b>your Anthropic API key</b>.'
+    : '<br>No Anthropic key saved: the agents run on the Claude account logged in on this server.';
+  $('#keys').innerHTML = st.keys.map(k => `<div class="key" data-k="${k.name}">
+    <div class="head"><b>${esc(k.label.split(':')[0])}</b><span class="st ${k.set ? 'replied' : ''}">${k.set ? 'Connected' : 'Not connected'}</span>
+      <span class="sub">${esc(k.label.split(':').slice(1).join(':').trim())}</span></div>
+    <div class="sub" style="margin-top:4px">${k.set ? `Saved key: <code>${esc(k.masked)}</code> · ` : ''}<a href="${esc(k.help)}" target="_blank" rel="noopener">Get a key</a> · <code>${k.name}</code></div>
+    <div class="row"><input type="password" autocomplete="off" spellcheck="false" placeholder="${k.set ? 'Paste a new key to replace it' : 'Paste your key'}">
+      <button class="primary" data-a="save">Save</button><button data-a="test"${k.set ? '' : ' disabled'}>Test</button>${k.set ? '<button data-a="remove">Remove</button>' : ''}</div>
+    <div class="msg"></div></div>`).join('');
+}
+async function loadSettings() { try { drawSettings(await (await fetch('/api/settings', { cache: 'no-store' })).json()); } catch {} }
+$('#keys').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const card = b.closest('.key'), name = card.dataset.k, input = card.querySelector('input'), msg = () => card.querySelector('.msg');
+  const say = (t, ok) => { const m = msg(); m.textContent = t; m.className = 'msg ' + (ok ? 'ok' : 'bad'); };
+  if (b.dataset.a === 'test') { say('Testing…', true); const r = await post('/api/settings/test', { name }); return say(r.detail, r.ok); }
+  if (b.dataset.a === 'save' && !input.value.trim()) return say('Paste a key first.', false);
+  const value = b.dataset.a === 'remove' ? '' : input.value.trim();
+  input.value = '';
+  const r = await post('/api/settings', { name, value });
+  if (r.error) return say(r.error, false);
+  drawSettings(r);
+  const card2 = document.querySelector(`.key[data-k="${name}"]`);
+  if (value) { card2.querySelector('.msg').textContent = 'Saved. Testing…'; card2.querySelector('.msg').className = 'msg ok';
+    const t = await post('/api/settings/test', { name }); card2.querySelector('.msg').textContent = t.detail; card2.querySelector('.msg').className = 'msg ' + (t.ok ? 'ok' : 'bad'); }
+};
+
+const close = () => { current = null; $('#drawer').classList.remove('open'); $('#drawer').setAttribute('aria-hidden', 'true'); draw(); };
+$('#dClose').onclick = close;
+addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+</script>
+</body>
+</html>
